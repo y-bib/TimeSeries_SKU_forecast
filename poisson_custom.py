@@ -86,26 +86,59 @@ def plot_SKU(df_cl, y_col='VALUE', title='Sold per day'):
 
 #two options to fix outliners
 ###########outliners via zscore
+# def zscore(s, window, thresh=3, return_all=False):
+
+#     def apply_once(series, window=30, thresh=3, return_all=False):
+#         roll = series.rolling(window=window, min_periods=1, center=True)
+#         avg = roll.mean()
+#         std = roll.std(ddof=0)
+#         z = series.sub(avg).div(std)  
+#         m = z < thresh
+        
+#         # Replace outliers with rolling mean, clipped to at least 1
+#         replaced = series.where(m, avg).round().clip(lower=1).astype(int)    
+#         return replaced, z, avg, std, m
+
+#     # First pass
+#     s1, z1, avg1, std1, m1 = apply_once(s, window=window, thresh=thresh)
+
+#     # Second pass
+#     s2, z2, avg2, std2, m2 = apply_once(s1, window=window, thresh=thresh)
+
+#     if return_all:
+#         return avg2, m1 & m2
+#     return s2
+
+import numpy as np
+import pandas as pd
+
 def zscore(s, window, thresh=2, return_all=False):
 
     def apply_once(series):
         roll = series.rolling(window=window, min_periods=1, center=True)
         avg = roll.mean()
         std = roll.std(ddof=0)
-        z = round(series.sub(avg).div(std))  # rounded z-score
+        z = series.sub(avg).div(std)  
         m = z.between(-thresh, thresh)
         return series.where(m, avg), z, avg, std, m
 
-    # First pass
-    s1, z1, avg1, std1, m1 = apply_once(s)
+    # If >50% zeros → clip at Q95 instead of z-score
+    zero_ratio = (s == 0).mean()
+    if zero_ratio > 0.75:
+        q95 = s.quantile(0.95)
+        s_clipped = s.clip(upper=q95).astype(int)
+        mask = s <= q95  # True if unchanged, False if clipped
+        if return_all:
+            return s_clipped, mask
+        return s_clipped
 
-    # Second pass
-    s2, z2, avg2, std2, m2 = apply_once(s1)
+    # Otherwise apply two-pass z-score method
+    s1, z1, avg1, std1, m1 = apply_once(s)
+    #s2, z2, avg2, std2, m2 = apply_once(s1)
 
     if return_all:
-        return avg2, m1&m2
-    return s2
-
+        return avg1, m1
+    return s1
 
 import matplotlib.pyplot as plt
 
@@ -900,8 +933,8 @@ def process_sku(df, SKU):
     df_cl = sku_extract(df, SKU)
 
     # 2) Compute z-score for VALUE
-    df_cl['VALUE2'] = zscore(df_cl['VALUE'], window=120)
-    avg, m = zscore(df_cl['VALUE'], window=120, return_all=True)
+    df_cl['VALUE2'] = zscore(df_cl['VALUE'], window=90)
+    avg, m = zscore(df_cl['VALUE'], window=90, return_all=True)
 
     plot_zscore(df_cl, avg, m)
 
