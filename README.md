@@ -19,6 +19,7 @@ This project performs **time series forecasting** using XGBoost for daily demand
   - **MAE** (Mean Absolute Error)  
   - **MAPE** (Mean Absolute Percentage Error, non-zero values only, biased-calculated)  
   - **Sample Variance** calculated on the test data (20% of the whole data)
+- Confidence intervals were calculated using the same value of variance calculated based on test data (test data, predicted data)
 
 ## Assumpition
 - State space methods assumes Gaussian distribution of resuduals - did not tested that for the given data
