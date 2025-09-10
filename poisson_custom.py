@@ -22,33 +22,12 @@ import os
 
 
 
-# In[32]:
-
-
-# filename = f"data/mock_test.csv"
-# df = pd.DataFrame()
-# df = pd.read_csv(filename,sep=',')
-# SKU_list = df['ITEM_CODE'].unique()
-
-# filename_out = f"data/mock_out.csv"
-# try:
-#     os.remove(filename_out)
-# except FileNotFoundError:
-#     pass
-
-
-# In[33]:
-
-
-# for SKU in SKU_list[-4:]:
-#     _ = process_sku(df, SKU)
-
 
 # ## functions
 
 # In[4]:
 
-
+# returns data frame for one SKU only
 def sku_extract(df, SKU = '991234-A'):
     df_cl = df[['DATE','VALUE','ITEM_CODE']][df.ITEM_CODE == SKU].copy()
     df_cl.reset_index(drop=True, inplace=True)
@@ -57,11 +36,11 @@ def sku_extract(df, SKU = '991234-A'):
 
 # In[5]:
 
-
+# point plot
 def plot_SKU(df_cl, y_col='VALUE', title='Sold per day'):
     plt.figure(figsize=(10, 5))
     sns.lineplot(data=df_cl, x=df_cl.index, y=df_cl[y_col])
-    # plt.ylim(0, 5)  # optional: uncomment to set y-axis limits
+    # plt.ylim(0, 5)  
     plt.title(title)
     plt.ylabel('Sold')
     plt.xlabel('Days')
@@ -70,18 +49,8 @@ def plot_SKU(df_cl, y_col='VALUE', title='Sold per day'):
     plt.show()
 
 
-# In[6]:
 
 
-# filename = f"data/mock_test.csv"
-# df = pd.DataFrame()
-# df = pd.read_csv(filename,sep=',')
-# print(df['ITEM_CODE'].unique())
-# #df.drop_duplicates(subset=['ITEM_CODE', 'NAME'])
-# df_cl=sku_extract(df, '561934-A')
-
-
-# In[7]:
 
 
 #two options to fix outliners
@@ -109,9 +78,7 @@ def plot_SKU(df_cl, y_col='VALUE', title='Sold per day'):
 #         return avg2, m1 & m2
 #     return s2
 
-import numpy as np
-import pandas as pd
-
+# two rounds of rolling average check and case for many zeroes
 def zscore(s, window, thresh=2, return_all=False):
 
     def apply_once(series):
@@ -140,7 +107,6 @@ def zscore(s, window, thresh=2, return_all=False):
         return avg1, m1
     return s1
 
-import matplotlib.pyplot as plt
 
 def plot_zscore(df_cl, avg, m):
 
@@ -171,7 +137,7 @@ def plot_zscore(df_cl, avg, m):
     plt.show()
 
 
-######### outliner via MAX
+######### outliner cap above threshold
 def cap_outliers(df, col='VALUE', outl=10): # replaces outlines (above outl level) with maximum
     df_copy = df.copy()
     mask_valid = df_copy[col] <= outl
@@ -204,19 +170,7 @@ def plot_cap_outliers(VAL, VAL2, outl=10):
     plt.show()
 
 
-# In[8]:
-
-
-# outl=20
-# df_cl['VALUE2'] = cap_outliers(df_cl, col='VALUE', outl=outl)['VALUE']
-# plot_outliers(df_cl['VALUE'],df_cl['VALUE2'],outl)
-# z, avg, std, m = zscore(df_cl['VALUE'], window=100, return_all=True)
-# plot_zscore(z, avg, std, m)
-
-
-# In[9]:
-
-
+# get season based on month number
 def get_season(month):
     if month in [6, 7, 8]:
         return 0
@@ -241,16 +195,7 @@ def date_split(df_cl):
 
 
 
-# In[10]:
 
-
-# date_split(df_cl)
-
-# print(df_cl)
-# print(df_cl['Season'].unique())
-
-
-# In[11]:
 
 
 def means_and_cor(df_cl):
@@ -301,13 +246,7 @@ def means_and_cor(df_cl):
     print("Correlation between VALUE2 and Season:", correlation)
 
 
-# In[12]:
 
-
-# means_and_cor(df_cl)
-
-
-# In[13]:
 
 
 def poisson_regression(df_cl):
@@ -343,19 +282,7 @@ def poisson_regression(df_cl):
     return df_tmp[['predicted']]
 
 
-# In[14]:
 
-
-#print(df_cl.columns)
-
-
-# In[15]:
-
-
-#_ = poisson_regression(df_cl)
-
-
-# In[16]:
 
 
 def state_space(df_cl, seasonality_col = 'Season'):
@@ -401,9 +328,6 @@ def state_space(df_cl, seasonality_col = 'Season'):
     plt.show()
 
 
-# In[17]:
-
-
 def errors(y_test, pred_mean, pred_integer):
     # y_test = np.asarray(y_test)
     # pred_mean = np.asarray(pred_mean)
@@ -421,7 +345,7 @@ def errors(y_test, pred_mean, pred_integer):
     mean_res = np.mean(residuals)
     var_test_sample = (1 / (n - 1)) * np.sum((residuals - mean_res) ** 2)
 
-    # MAPE (byised, ignore zeros)
+    # MAPE (byised, ignores zeros)
     mask = y_test != 0
     mape_mean = np.mean(np.abs((y_test[mask] - pred_mean[mask]) / y_test[mask]))*100
     mape_integer = np.mean(np.abs((y_test[mask] - pred_integer[mask]) / y_test[mask]))*100
@@ -433,9 +357,6 @@ def errors(y_test, pred_mean, pred_integer):
         "mape_integer": mape_integer,
         "var_test_sample": var_test_sample
     }
-
-
-# In[18]:
 
 
 from sklearn.metrics import mean_absolute_error
@@ -498,22 +419,6 @@ def fit_ucm_and_evaluate(df_cl, seasonality_col, test_size=0.2, plot=True):
 
     return results
 
-
-# In[19]:
-
-
-#df_cl.loc[:, 'VALUE'].rolling(window=90).mean().plot(
-#     lw=2, color='blue', label='xx-day Rolling Mean'
-# )
-
-
-# In[20]:
-
-
-#fit_ucm_and_evaluate(df_cl, seasonality_col = 'Season', test_size=0.2, plot=True)
-
-
-# In[21]:
 
 
 def fit_xgb_poisson(df_cl, test_size=0.2, max_lag=3, plot=True):
@@ -593,20 +498,8 @@ def fit_xgb_poisson(df_cl, test_size=0.2, max_lag=3, plot=True):
     return results
 
 
-# In[22]:
 
-
-# results = fit_xgb_poisson(df_cl, test_size=0.2, max_lag=3, plot=True)
-# print("Test MAE (mean):", results["mae_mean"])
-# print("Test MAE (integer):", results["mae_integer"])
-# print("Test MAPE (mean):", results["mape_mean"])
-# print("Test MAPE (integer):", results["mape_integer"])
-
-
-# In[23]:
-
-
-#Xboost with all seasonality and three lags
+#Xboost with all seasonality and lags
 def fit_xgb_poisson2(df_cl, test_size=0.2, max_lag=3, plot=True):
     # -------------------------
     # 1) Prepare data
@@ -955,9 +848,9 @@ def process_sku(df, SKU):
     # mean for weekdays, month and season
     means_and_cor(df_cl)
 
-    # 4) Fit UCM / state-space model and evaluate
+    # 4) Fit model and evaluate
     #results = fit_ucm_and_evaluate(df_cl, seasonality_col='Day_of_Week', test_size=0.2, plot=True)
-    results = fit_xgb_poisson2(df_cl, test_size=0.2, max_lag=7, plot=True)
+    results = fit_xgb_poisson2(df_cl, test_size=0.2, max_lag=7, plot=True)  # other good option space_state function
 
     # 5) Print evaluation metrics
     print("Test MAE (mean):", results["mae_mean"])
@@ -1017,14 +910,6 @@ def plot_forecast_with_intervals(df):
     plt.tight_layout()
     plt.show()
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
 
 
 
