@@ -8,8 +8,9 @@ This project performs **time series forecasting** using XGBoost for daily demand
 - Intermittent Time Series/Poisson Time Series  
 
 ## Output
-- File: `mock_out.csv`  
-- Forecast includes dates, SKU predictions and  95%,97%,99% prediction intervals  
+- File `mock_out.csv` colntaints predicted values  
+- Forecast includes dates, SKU predictions and  95%,97%,99% prediction intervals
+- File **poisson_can.ipynb** contains technical report including outliners plot, rolling average plot, model test plot, weekday/month/season correlations, model prediction plot for each SKU 
 
 ## Method
 - **Outliners**: two round of zscore filter ()
