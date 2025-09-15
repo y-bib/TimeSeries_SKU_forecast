@@ -113,8 +113,8 @@ def process_sku(df, SKU):
 
     # 4) Fit model and evaluate
     #results = fit_ucm_and_evaluate(df_cl, seasonality_col='Day_of_Week', test_size=0.2, plot=True)
-    max_run = df_cl["VALUE2"].groupby((df_cl["VALUE2"] != df_cl["VALUE2"].shift()).cumsum()).size().max()
-
+    max_len = df_cl["VALUE2"].groupby((df_cl["VALUE2"] != df_cl["VALUE2"].shift()).cumsum()).size().max()
+    max_run = max(max_len, 7)
     results = fit_xgb_poisson2(df_cl, test_size=0.2, max_lag=max_run+1, plot=True)  # other good option space_state function
 
     # 5) Print evaluation metrics
