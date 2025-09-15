@@ -35,7 +35,7 @@ def zscore(s, window, thresh=2.5, return_all=False):
     z1 = (s - med1) / (mad1 * 1.4826)
     #m1 = z1.between(-thresh, thresh)
     m1 = z1 < thresh
-    s1 = s.where(m1, med1)
+    s1 = s.where(m1, med1).astype(float)
 
     # # Second pass: recalc on cleaned data
     # roll2 = s1.rolling(window=window, min_periods=1, center=True)

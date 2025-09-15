@@ -3,14 +3,15 @@
 ## Overview
 This project performs **time series forecasting** using XGBoost for daily demand prediction.
 
+
 ## Input
 - File: `mock_test.csv`  
 - Intermittent Time Series/Poisson Time Series  
 
 ## Output
 - File `mock_out.csv` colntaints predicted values  
-- Forecast includes dates, SKU predictions and  95%,97%,99% prediction intervals
-- File `poisson_can.ipynb` contains technical report including outliners plot, rolling average plot, model test plot, weekday/month/season correlations, model prediction plot for each SKU 
+- Forecast includes dates, SKU predictions and  95%, 97%, 99% prediction intervals
+- File `poisson_call2.ipynb` contains technical report including outliners plot, rolling average plot, model test plot, weekday/month/season correlations, model prediction plot for each SKU 
 
 ## Method
 - **Outliners**: two round of zscore filter ()
@@ -27,7 +28,7 @@ This project performs **time series forecasting** using XGBoost for daily demand
 - Outlnears are erros of input not results of promotions
 
 ## Notes
-- `poisson_custome.py` also contains _Poisson regression_ and _State_Space model_ with Poisson rounding. The accuracy of forecast is approximately same.
+- `poisson_custom.py` calls XGBoost.Also tried state_space method - the accuracy of forecast is approximately same.
 - Primary analysis showed that there were no sufficient correlation  between numbers of sold SKUs, different rates of zeroes for SKUs: approximately 0, 0.3-0.35, 0.8
 - also tried ARIMA but variation is not constant and mostly series donot pass stationarity test after first/second differences
 - also tried to use Poisson HMM (Poisson Hidden Markov Model) with no success, need to try it in R
