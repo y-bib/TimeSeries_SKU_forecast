@@ -74,7 +74,7 @@ def pred_out(df_pred, SKU, variance):
     }
 
     for level, z in z_scores.items():
-        df_out[f"LOWER_{level}"] = df_out["FORECAST"] - z * std
+        df_out[f"LOWER_{level}"] = (df_out["FORECAST"] - z * std).clip(lower=0)
         df_out[f"UPPER_{level}"] = df_out["FORECAST"] + z * std
 
     df_out = df_out[['Date', 'ITEM_CODE','FORECAST', 'LOWER_95', 'UPPER_95', 'LOWER_97', 'UPPER_97', 'LOWER_99', 'UPPER_99']]
