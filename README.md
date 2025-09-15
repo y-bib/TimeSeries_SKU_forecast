@@ -11,7 +11,7 @@ This project performs **time series forecasting** using XGBoost for daily demand
 ## Output
 - File `mock_out.csv` colntaints predicted values  
 - Forecast includes dates, SKU predictions and  95%, 97%, 99% prediction intervals
-- File `poisson_call2.ipynb` contains technical report including outliners plot, rolling average plot, model test plot, weekday/month/season correlations, model prediction plot for each SKU 
+- File `call_poisson2.ipynb` contains technical report including outliners plot, rolling average plot, model test plot, weekday/month/season correlations, model prediction plot for each SKU 
 
 ## Method
 - **Outliners**: two round of zscore filter ()
