@@ -14,7 +14,7 @@ import xgboost as xgb
 from sklearn.model_selection import TimeSeriesSplit
 from errors_custom import errors
 
-def xgb_cv(df_cl, max_lag=7, window=90, plot=True):
+def xgb_cv(df_cl, max_lag=7, test_size=30, plot=True):
     # -------------------------
     # 1) Prepare data
     # -------------------------
@@ -38,9 +38,8 @@ def xgb_cv(df_cl, max_lag=7, window=90, plot=True):
     # -------------------------
     # 2) Time series cross-validation
     # -------------------------
-    n_splits = max(2, len(X) // window)  # ensure at least 2 splits
-    tscv = TimeSeriesSplit(n_splits=n_splits)
-
+    tscv = TimeSeriesSplit(test_size=test_size)
+    
     y_preds = np.full_like(y, fill_value=np.nan, dtype=float)
     all_index = []  # collect all test indices
 
@@ -85,13 +84,17 @@ def xgb_cv(df_cl, max_lag=7, window=90, plot=True):
     # -------------------------
     if plot:
         plt.figure(figsize=(12, 5))
-        plt.plot(y[all_index], label="Observed", marker='o')
-        plt.plot(y_preds[all_index], label=f"Predicted mean (window={window})", marker='x')
-        plt.plot(np.round(y_preds[all_index]), label=f"Predicted integer (window={window})", marker='s', alpha=0.7)
+        
+        # Plot the entire observed series
+        plt.plot(df_cl['VALUE2'].values, label="Observed (all data)", color='blue', alpha=0.6)
+        
+        # Plot predicted values (only where predictions exist)
+        plt.plot(y_preds, label="Predicted mean", color='red', marker='x', linestyle='None')
+        plt.plot(np.round(y_preds), label="Predicted integer", color='green', marker='s', linestyle='None', alpha=0.7)
+        
         plt.xlabel("Time index")
         plt.ylabel("Counts")
-        plt.title(f"XGBoost Poisson Forecast (CV, window={window})")
+        plt.title("Observed vs Predicted Values (XGBoost Poisson Forecast)")
         plt.legend()
         plt.show()
-
     return results
