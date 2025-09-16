@@ -8,7 +8,7 @@ import statsmodels.formula.api as smf
 
 from statsmodels.tsa.statespace.structural import UnobservedComponents # for state space method
 from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_absolute_percentage_error
+
 import os
 
 

@@ -249,7 +249,7 @@ def fit_xgb_poisson2(df_cl, test_size=0.2, max_lag=7, plot=True):
 # print(f"MAPE (%) integer: {results['mape_integer']:.2f}%")
 
 
-def fit_xgb_poisson2_out(df_cl, df_pred, max_lag=7, n=30):
+def fit_xgb_poisson2_out(df_cl, df_pred, max_lag=3, n=30):
 
     # 1) Prepare lag features from historical data
     df_tmp = pd.DataFrame({'y': df_cl['VALUE2'].values})

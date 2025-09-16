@@ -6,20 +6,15 @@ import xgboost as xgb #for xboost
 from sklearn.model_selection import TimeSeriesSplit
 from errors_custom import errors
 
-
-from sklearn.model_selection import TimeSeriesSplit
-import xgboost as xgb
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
-from sklearn.model_selection import TimeSeriesSplit
-import xgboost as xgb
+import seaborn as sns
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+import xgboost as xgb
+from sklearn.model_selection import TimeSeriesSplit
+from errors_custom import errors
 
-def xgb_cv(df_cl, max_lag=7, window=7, plot=True):
+def xgb_cv(df_cl, max_lag=7, window=90, plot=True):
     # -------------------------
     # 1) Prepare data
     # -------------------------
@@ -46,7 +41,8 @@ def xgb_cv(df_cl, max_lag=7, window=7, plot=True):
     n_splits = max(2, len(X) // window)  # ensure at least 2 splits
     tscv = TimeSeriesSplit(n_splits=n_splits)
 
-    y_preds = np.zeros_like(y)
+    y_preds = np.full_like(y, fill_value=np.nan, dtype=float)
+    all_index = []  # collect all test indices
 
     for train_index, test_index in tscv.split(X):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
@@ -65,11 +61,14 @@ def xgb_cv(df_cl, max_lag=7, window=7, plot=True):
 
         pred_mean = model.predict(X_test)
         y_preds[test_index] = pred_mean
+        all_index.extend(test_index)  # store indices
+
+    all_index = np.array(all_index)  # convert to numpy array
 
     # -------------------------
     # 3) Calculate errors
     # -------------------------
-    err = errors(y, y_preds, np.round(y_preds).astype(int))
+    err = errors(y[all_index], y_preds[all_index], np.round(y_preds[all_index]).astype(int))
 
     results = {
         "pred_mean": y_preds,
@@ -86,9 +85,9 @@ def xgb_cv(df_cl, max_lag=7, window=7, plot=True):
     # -------------------------
     if plot:
         plt.figure(figsize=(12, 5))
-        plt.plot(y, label="Observed", marker='o')
-        plt.plot(y_preds, label=f"Predicted mean (window={window})", marker='x')
-        plt.plot(np.round(y_preds), label=f"Predicted integer (window={window})", marker='s', alpha=0.7)
+        plt.plot(y[all_index], label="Observed", marker='o')
+        plt.plot(y_preds[all_index], label=f"Predicted mean (window={window})", marker='x')
+        plt.plot(np.round(y_preds[all_index]), label=f"Predicted integer (window={window})", marker='s', alpha=0.7)
         plt.xlabel("Time index")
         plt.ylabel("Counts")
         plt.title(f"XGBoost Poisson Forecast (CV, window={window})")
